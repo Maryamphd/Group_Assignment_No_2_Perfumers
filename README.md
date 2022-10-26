@@ -27,4 +27,4 @@ The dataset was collected for the purpose of building a recommendation system as
 | Middle_note | The Middle note is the core and very essence of the of the perfume |
 | Base_note | The base notes of the perfume give it depth, richness (the foundation of the perfume) ||
 ---
-### Sources
+### References
