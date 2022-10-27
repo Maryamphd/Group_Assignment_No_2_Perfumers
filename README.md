@@ -28,5 +28,8 @@ The dataset was collected for the purpose of building a recommendation system as
 | Base_note | The base notes of the perfume give it depth, richness (the foundation of the perfume) ||
 ---
 ### References
-https://medium.com/@wejdan.alahmadi94/noon-perfume-recommender-system-content-based-filtering-using-cosine-similarity-99a857f5e5fe
+[https://www.theperfumeshop.com/blog/expertise/everything-you-need-know-about-perfume-oil-concentration/](https://www.theperfumeshop.com/blog/expertise/everything-you-need-know-about-perfume-oil-concentration/)
+[noon perfume | Kaggle](https://www.kaggle.com/datasets/monirahabdulaziz/noon-perfume)
+[Why Do Luxury Perfumes Cost So Much, And Are They Worth It? | HuffPost Life](https://www.huffpost.com/entry/why-does-luxury-perfume-cost-so-much_l_606ca875c5b6832c793c8737)
+[https://medium.com/@wejdan.alahmadi94/noon-perfume-recommender-system-content-based-filtering-using-cosine-similarity-99a857f5e5fe](https://medium.com/@wejdan.alahmadi94/noon-perfume-recommender-system-content-based-filtering-using-cosine-similarity-99a857f5e5fe)
 
