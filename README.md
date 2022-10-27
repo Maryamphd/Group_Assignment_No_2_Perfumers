@@ -30,7 +30,6 @@ The dataset was collected for the purpose of building a recommendation system as
 ### References
 [https://www.theperfumeshop.com/blog/expertise/everything-you-need-know-about-perfume-oil-concentration/](https://www.theperfumeshop.com/blog/expertise/everything-you-need-know-about-perfume-oil-concentration/)
 
-[noon perfume | Kaggle](https://www.kaggle.com/datasets/monirahabdulaziz/noon-perfume)
 
 [Why Do Luxury Perfumes Cost So Much, And Are They Worth It? | HuffPost Life](https://www.huffpost.com/entry/why-does-luxury-perfume-cost-so-much_l_606ca875c5b6832c793c8737)
 
