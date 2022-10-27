@@ -28,3 +28,5 @@ The dataset was collected for the purpose of building a recommendation system as
 | Base_note | The base notes of the perfume give it depth, richness (the foundation of the perfume) ||
 ---
 ### References
+https://medium.com/@wejdan.alahmadi94/noon-perfume-recommender-system-content-based-filtering-using-cosine-similarity-99a857f5e5fe
+
