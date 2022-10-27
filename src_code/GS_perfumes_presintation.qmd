@@ -1,0 +1,386 @@
+---
+title: "Golden Scent Perfumes"
+format: 
+    revealjs:
+      slide-number: true
+
+---
+
+## Presented by: {auto-animate="true" style="font-size: 1.5em; text-align: center"}
+
+::: {.fragment .fade-up}
+-   Mukhtar Alhejji
+:::
+
+::: {.fragment .fade-up}
+-   Mariam Busaleh
+:::
+
+::: {.fragment .fade-up}
+-   Razan Sendi
+:::
+
+::: {.fragment .fade-up}
+-  Abdulrahman Almegren
+:::
+
+## Backstory: 
+
+- A startup company wants to start her new business, perfumes in a local business.
+- By analyzing the given data this company wants to know how to start her company by gitting insightful information about the market.   
+
+## DataSet:
+- The dataset was collected from Golden Scent website using web-scrabing by an alumni of the DSI program, Rawan AlQarni. 
+- Each row represents a listed perfume features on the website.
+
+- 6237 observation (rows)
+- 19 features (columns)
+
+## Data Cleaning:
+- Check for missing values 
+  - 11614 missing values
+  - Number of Rows with 10 or More Missing Column Values 307
+- Drop Duplicates 34
+- Execlude unwanted rows and columns
+  - image and Description
+- change types of columns  
+  - check and clean Attribute in some of columns
+
+# Data Analysis {style="font-size: 1.5em; text-align: center"}
+
+```{python}
+#| echo: false
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+from wordcloud import WordCloud, STOPWORDS
+%matplotlib inline
+
+df=pd.read_csv('Cleaned_Golden_Scent_df.csv')
+```
+
+## top 10 brands {style="font-size: 0.5em; text-align: center"}
+
+```{python}
+#| echo: false
+df_new = df.copy()
+df_new.Price = df_new.Price.replace('none', np.nan)
+df_new.Price = df_new.Price.astype('Int32')
+df_new.Year = df_new['Year'].str.extract(r'^(\d{4})', expand=False)
+df_new.Year = df_new.Year.astype('Int32')
+df_new['Fragrance_Family'] = df_new['Fragrance_Family'].str.replace('Woody_Woody','Woody')
+
+def spl(a):
+    return a.split('_')[0]
+
+df_new["Size"] = df_new.Size.map(spl)
+
+```
+
+```{python}
+#| echo: false
+brand_avg = df_new.groupby(["Brand",'Rate','Size','Product_Type'])[['Price']].mean().reset_index()
+
+
+top_brands = brand_avg.groupby("Brand").mean()\
+    .sort_values('Price', ascending=False).reset_index().head(10)
+
+
+plt.figure(figsize=(20 , 10))
+plt.bar(top_brands['Brand'], top_brands['Price'])
+plt.ylabel('Price in (SAR)', fontsize = 23)
+plt.yticks(fontsize=15)
+plt.xlabel('\nBrand names', fontsize = 23)
+
+plt.xticks(rotation=45)
+plt.title('Price in (SAR) vs. Brands', fontsize = 23,family = 'serif');
+```
+
+## Most popular words for the top perfumes {style="font-size: 0.5em; text-align: center"}
+```{python}
+#| echo: false
+df_high=df[(df.Rate >= '4.5') & (df.Rating_count >= 3) & (df.Product_Type =='Perfume')]
+brands_list= df_high['Brand'].unique().tolist()
+stopword_list= ['Le','Creed','Chanel','Armani','Giorgio','The','Perfumes','Elie','Saab','EDC',  'Majed','Jo','Malone','Collection','Oil','Musk','Victoria','Secret','Van','Cleef',
+'Tom','Ford','Dolce','Jimmy','Choo','Gabbana','Hugo','Boss','Calvin','Klein','Jo Malone',
+'Men','Women','For','Pour Femme''Gift Set','Yves','Saint','Hair','Mist','Al','Dakheel','EDP','EDT',
+'Oud','Perfume','Pour','Femme','Parfum','Toilette','Eau','De','Eau De Perum','Les','ml',"Eau", "Parfum","Toilette", "de", "set", "Travel", "Mini", "Perfume", 
+"Spray", "Cologne", "For", "Rollerball", "Oil", "Gift", "Fragrance", "Body"]
+
+
+stopword_list.extend(brands_list)
+
+df_word=df[df.Product_Type == 'Perfume']
+fragrance_words= df_word['Name'].str.cat(sep="\n")
+name_wordcloud= WordCloud(width=800, height=700, background_color="white",stopwords = stopword_list).generate(fragrance_words)
+plt.figure(figsize=(10,10))
+plt.imshow(name_wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+```
+
+## the most used base notes for the fragrances {style="font-size: 0.5em; text-align: center"}
+
+```{python}
+#| echo: false
+note_str = ','.join(str(v) for v in df["Base_note"])
+
+notesWordcloud = WordCloud(width=800, height=700, margin=0, background_color='white',
+                     stopwords=["Unknown","nan","Tonka","and","Oud","of","Oil"], collocations=False).generate(note_str)
+
+plt.figure(figsize=(10,10))
+plt.title('Most Used Base Notes For the Fragrances')
+plt.imshow(notesWordcloud,interpolation='bilinear')
+plt.axis("off")
+plt.margins(x=0, y=0)
+plt.show()
+```
+
+## what makes a perfume luxurious {style="font-size: 0.5em; text-align: center"}
+
+```{python}
+#| echo: false
+df_perfumes=df.copy()
+options = ['Perfume'] 
+rslt_df1 = df_perfumes[df_perfumes['Product_Type'].isin(options)] 
+
+rslt_df = rslt_df1[rslt_df1['Concentration'] == 'Eau de Parfum'] 
+
+rslt_df = rslt_df1[rslt_df1['Price'] > '500'] 
+
+df_perfumes = rslt_df[rslt_df["Top_note"].str.contains("NaN") == False]
+df_perfumes = rslt_df[rslt_df["Middle_note"].str.contains("NaN") == False]
+df_perfumes = rslt_df[rslt_df["Base_note"].str.contains("NaN") == False]
+df_perfumes = rslt_df[rslt_df["Top_note"].str.contains("Unknown") == False]
+df_perfumes = rslt_df[rslt_df["Middle_note"].str.contains("Unknown") == False]
+df_perfumes = rslt_df[rslt_df["Base_note"].str.contains("Unknown") == False]
+
+df_perfumes_Women = df_perfumes[(df_perfumes['Gender'] == 'Women') ]
+df_perfumes_Men = df_perfumes[(df_perfumes['Gender'] == 'Men') ]
+df_perfumes_Unisex = df_perfumes[(df_perfumes['Gender'] == 'Unisex') ]
+```
+
+
+```{python}
+#| echo: false
+stopwords_list = list(STOPWORDS)
+list_words=['perfum','parfums','de','la','eau','perfume','parfumeur','oud','j','perfumes','di']
+stopwords_list.extend(list_words)
+
+from collections import Counter
+ 
+def remov_duplicates(input):
+ 
+    # split input string separated by space
+    input = input.split(" ")
+ 
+    # now create dictionary using counter method
+    # which will have strings as key and their
+    # frequencies as value
+    UniqW = Counter(input)
+ 
+    # joins two adjacent elements in iterable way
+    s = " ".join(UniqW.keys())
+    return ("\""+ s + "\"")
+
+def wordcloud_creation(df_data,stopwords_list):
+    note_str = ','.join(str(v) for v in df_data)
+    notesWordcloud = WordCloud(width=800, height=700, margin=0, background_color='white',
+                     stopwords=stopwords_list , collocations=False).generate(remov_duplicates(note_str))
+    plt.figure(figsize=(5,5))
+    plt.imshow(notesWordcloud,interpolation='bilinear')
+    plt.axis("off")
+    plt.margins(x=0, y=0)
+    plt.show()
+```
+
+::: {.panel-tabset}
+
+### Women Luxury Brands
+```{python}
+#| echo: false
+wordcloud_creation(df_perfumes_Women.Brand,stopwords_list)
+```
+
+### men Luxury Brands
+
+```{python}
+#| echo: false
+wordcloud_creation(df_perfumes_Men.Brand,stopwords_list)
+```
+
+### Unisex Luxury Brand
+
+```{python}
+#| echo: false
+wordcloud_creation(df_perfumes_Unisex.Brand,stopwords_list)
+```
+:::
+
+
+## the best rated fragrance for men and women {style="font-size: 0.5em; text-align: center"}
+::: {.panel-tabset}
+### Women
+```{python}
+#| echo: false
+Women_Top=df[(df.Gender == 'Women') & (df.Rate >= '4.5') & (df.Rating_count >= 3)]
+
+Women_Top['Fragrance_Family'].value_counts(normalize=True).plot(kind = 'bar', subplots = False, figsize = (6,3),color=['lightblue','lightgreen','purple'], alpha = .6)
+
+plt.xlabel('Fragrance Family',fontsize=12)
+plt.ylabel('Quantity',fontsize=12)
+plt.xticks(rotation=45)
+plt.title(' Best Rated Fragrance Families According to Women',fontsize=10);
+```
+
+### men
+
+```{python}
+#| echo: false
+Women_Top=df[(df.Gender == 'Men') & (df.Rate >= '4.5') & (df.Rating_count >= 3)]
+
+
+Women_Top['Fragrance_Family'].value_counts(normalize =True).plot(kind = 'bar', subplots = False, figsize = (6,3),color=['lightblue','lightgreen','purple'], alpha = .6)
+
+plt.xlabel('Fragrance Family',fontsize=12)
+plt.ylabel('Porportion',fontsize=12)
+plt.xticks(rotation=45)
+plt.title(' Best Rated Fragrance Families According to Men',fontsize=10);
+```
+
+:::
+
+## Average Price of the Fragrance Families {style="font-size: 0.5em; text-align: center"}
+
+```{python}
+#| echo: false
+df_copy=df.copy()
+df_copy =df_copy[df_copy['Rate'] !='No-Rate']
+df_copy['Rate']=df_copy['Rate'].astype(float)
+
+df_copy.groupby(['Brand']).mean()['Rate'].sort_values(ascending = False).to_frame(name = 'Average Ratings').tail(10)
+
+df_copy.groupby(['Fragrance_Family','Gender']).mean()['Rate'].sort_values(ascending = False).to_frame(name = 'Average Ratings')
+
+df_price =df[df['Price'] !='none']
+df_price.Price=df_price.Price.astype(int)
+
+df_price =df_price[df_price.Product_Type == 'Perfume']
+ax=df_price.groupby(['Fragrance_Family']).mean()['Price'].sort_values(ascending = False).to_frame(name = 'Average Price').plot.barh(figsize=(12,8), rot=0, width=0.7,color= ['lightblue','lightgreen','pink','blue'])
+ax.bar_label(ax.containers[0])
+plt.xlabel('Average Price (SAR)',fontsize=12)
+plt.ylabel('Fragrance Family',fontsize=12)
+plt.title('Average Price Based on the Fragrance Family',fontsize=16);
+```
+
+## Base note word cloud {style="font-size: 0.5em; text-align: center"}
+
+```{python}
+#| echo: false
+comment_words = ''
+stopwords = set(STOPWORDS)
+ 
+# iterate through the csv file
+for val in df_perfumes.Base_note:
+ # typecaste each val to string
+    val = str(val)
+ 
+    # split the value
+    tokens = val.split()
+     
+    # Converts each token into lowercase
+    for i in range(len(tokens)):
+        tokens[i] = tokens[i].lower()
+     
+    comment_words += " ".join(tokens)+" "
+ 
+wordcloud = WordCloud(width = 800, height = 800,colormap='rainbow',
+                background_color ='white',
+                stopwords = stopwords,
+                min_font_size = 10).generate(comment_words)
+ 
+# plot the WordCloud image                      
+plt.figure(figsize = (8, 8), facecolor = None)
+plt.imshow(wordcloud)
+plt.axis("off")
+plt.tight_layout(pad = 0)
+ 
+plt.show()
+
+```
+
+
+##  Average Perfume Bottle Size based on the Concentration of the Perfume {style="font-size: 0.5em; text-align: center"}
+```{python}
+#| echo: false
+df_con=df.copy()
+df_con['Size'] = df_con['Size'].str.replace("ml_","")
+df_con['Size'] = df_con['Size'].str.replace("_"," ")
+df_con['Size'] = df_con['Size'].str.replace("ml","")
+df_con['Size']= df_con['Size'].astype(int)
+
+
+df_con.Concentration=df_con.Concentration.str.lstrip()
+df_con.Concentration=df_con.Concentration.str.rstrip()
+
+concentration_list=['Parfum','Eau de Parfum',                
+'Eau de Toilette' ,                                 
+'Eau de Cologne'   , 
+'Extrait de Parfum',
+'Eau de Parfum Intense',
+'Eau Fraiche',
+'Eau de Soin']
+
+df_con=df_con.loc[df_con.Concentration.isin(concentration_list)]
+df_con.groupby(df_con.Concentration)['Size'].mean()
+
+df_con.groupby(df_con.Concentration)['Size'].mean().sort_values(ascending=False).plot.bar(x = 'Concentration', color = 'lightblue', legend= None)
+
+plt.xlabel('Concentration Type',fontsize=12)
+plt.ylabel('Average bottle Size (ml)',fontsize=12)
+plt.title('Average Perfume Bottle Size based on the Concentration',fontsize=16);
+
+```
+
+##  Average Rate on the brand Based on Word used in the Perfume {style="font-size: 0.5em; text-align: center"}
+```{python}
+top_words=list(name_wordcloud.words_.keys())
+top_words=top_words[:15]
+
+df_top_name=df[df.Name.str.contains('|'.join(top_words))]
+
+
+df_top_name=df_top_name[df_top_name.Rate != 'No-Rate']
+df_top_name.Rate=df_top_name.Rate.astype('float')
+df_top_name.groupby(['Brand'])['Rate'].mean().sort_values(ascending = False).plot(kind = 'bar', subplots = False, figsize = (15,8),color=['lightblue','lightgreen','purple'], alpha = .6)
+plt.xlabel('Brand',fontsize=12)
+plt.ylabel('Average Rate',fontsize=12)
+plt.xticks(fontsize=15)
+plt.yticks(fontsize=15)
+plt.title('Average Rate on the brand Based on Word used in the Perfume',fontsize=16);
+
+```
+
+##  Summary : {style="font-size: 0.5em; text-align: center"}
+- Chanel, Dior, Lancôme , Guerlain and Hermes are the top most luxurious brands for women.Tom Ford, Lattafa ,Dior, Dunhill and Loewe are the top most luxurious brands for Men. Additionally, Lattafa, Hermetica, and Boadicea are the most luxurious brands for both Men & Women.
+- It was observed that the Amber, Patchouli, Musk, and Vanilla are the most used base notes in the perfumes.
+- The best rated Fragrance family according to women are the floral and floral_oriental scents, whereas for men , the aromatic, oriental and woody scents are the best rated.
+- The chypre, leather and woody oriental fragrances tend to me on average the most expensive in comparison to the floral, fruity and oriental scents.
+- Scrutinized and further assessed the words that tend to appear more frequently within the perfumes name which includes the words Rose, Intense, Tous, Jous, Gold and much more. Additionally,the majority of the brands that attained perfumes including the top words achieved a high rating.
+- In accordance to the concentration ,on average, the size bottle in ml for the Parfum and Eu De Cologne  concentrations are approximately 100 ml whereas the Eau De Soin concentrations have approximately 50 ml of liquid. 
+
+## Summary ... {style="font-size: 0.5em; text-align: center"}
+- On Average Louis Vuitton is the best rated and most expensive brand ,which is then followed by Creed and Roja.
+- A luxury perfume is a perfume that contains all of the three notes including the base, middle and top notes and its one that falls within the Eau De Parfum Concentration type.
+
+- Subsequently, the following notes are used to create such luxurious perfumes:
+    - Base note:(Musk, Amber, Vanilla, Patchouli and sandalwood)
+    - Middle note:(vanilla, amber, jasmine and Patchouli)
+    - Top Note: (Patchouli, amber, jasmine, rose, and musk) - Base note according to luxury brand
+
+    
+    
+## Questions {style="font-size: 2.5em; text-align: center"}
+
+Thank you for listening, do you have any questions?
